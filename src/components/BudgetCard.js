@@ -1,9 +1,11 @@
 import { Button, Card, ProgressBar, Stack } from 'react-bootstrap'
 import { currencyFormatter } from '../utils'
+import { useUpdateBudget } from '../contexts/BudgetsContext'
 
 export default function BudgetCard({ name, amount, max, inactive }) {
     let cardClasses = amount > max ? 'bg-danger bg-opacity-10 ' : ''
     // if (inactive) cardClasses += 'bg-light'
+    const updateBudget = useUpdateBudget()
     return (
         <Card className={cardClasses}>
             <Card.Body>
@@ -23,7 +25,9 @@ export default function BudgetCard({ name, amount, max, inactive }) {
                     now={amount}
                 />
                 <Stack direction="horizontal" gap="2" className="mt-4 justify-content-end">
-                    <Button variant="outline-primary">Add Expense</Button>
+                    <Button onClick={() => updateBudget(name)} variant="outline-primary">
+                        Add Expense
+                    </Button>
                     <Button variant="outline-secondary">View Expenses</Button>
                 </Stack>
             </Card.Body>

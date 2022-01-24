@@ -1,7 +1,9 @@
+import { useBudgets } from '../contexts/BudgetsContext'
 import { Button, Stack } from 'react-bootstrap'
 import BudgetCard from './BudgetCard'
 
 export default function Budgets() {
+    const budgets = useBudgets()
     return (
         <>
             <Stack direction="horizontal" gap="2" className="mb-4">
@@ -17,11 +19,15 @@ export default function Budgets() {
                     alignItems: 'flex-start',
                 }}
             >
-                <BudgetCard name="Groceries" amount={400} max={300} />
+                {budgets.map((budget, i) => {
+                    const { name, amount, max } = budget
+                    return <BudgetCard key={i} name={name} amount={amount} max={max} />
+                })}
+                {/* <BudgetCard name="Groceries" amount={400} max={300} />
                 <BudgetCard name="Health & Fitness" amount={20} max={100} />
                 <BudgetCard name="Gifts" amount={30} max={200} />
                 <BudgetCard name="Gas" amount={130} max={200} />
-                <BudgetCard name="Entertainment" amount={30} max={75} inactive={true} />
+                <BudgetCard name="Entertainment" amount={30} max={75} inactive={true} /> */}
             </div>
         </>
     )
