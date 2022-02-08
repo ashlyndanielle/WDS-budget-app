@@ -1,6 +1,15 @@
 import { createContext, useContext, useState } from 'react'
+import { v4 as uuidV4 } from 'uuid'
+
+import useLocalStorage from '../hooks/useLocalStorage'
 
 const BudgetsContext = createContext()
+/*
+	creating function makes using context cleaner than the below
+	import { BudgetsContext } from './contexts/BudgetsContext'
+	import { useContext } from 'react'
+	const budgets = useContext(BudgetsContext)
+*/
 export function useBudgets() {
     return useContext(BudgetsContext)
 }
@@ -10,23 +19,62 @@ export function useUpdateBudget() {
     return useContext(UpdateBudgetContext)
 }
 
+const initialBudgets = [
+    { id: uuidV4(), name: 'Groceries', max: 300 },
+    { id: uuidV4(), name: 'Health & Fitness', max: 100 },
+    { id: uuidV4(), name: 'Gifts', max: 200 },
+    { id: uuidV4(), name: 'Gas', max: 200 },
+    { id: uuidV4(), name: 'Entertainment', max: 75 },
+    { id: uuidV4(), name: 'Other', max: 200, inactive: true },
+]
+
 export const BudgetsProvider = ({ children }) => {
-    const initialBudgets = [
-        { id: 1, name: 'groceries', amount: 200, max: 300 },
-        { id: 2, name: 'Health & Fitness', amount: 20, max: 100 },
-        { id: 3, name: 'Gifts', amount: 30, max: 200 },
-        { id: 4, name: 'Gas', amount: 130, max: 200 },
-        { id: 5, name: 'Entertainment', amount: 78, max: 75 },
-    ]
-    const [budgets, setBudgets] = useState(initialBudgets)
-    const updateBudget = (budget) => {
-        console.log('budget!', budget)
+    const [budgets, setBudgets] = useLocalStorage('budgets', initialBudgets)
+    const [expenses, setExpenses] = useLocalStorage('expenses', [])
+
+    function getBudgetExpenses(budgetId) {
+        return expenses.filter((expense) => expense.budgetId === budgetId)
     }
+
+    function addExpense({ budgetId, amount, description = '' }) {
+        setExpenses((prevExpenses) => {
+            return [...prevExpenses, { id: uuidV4(), budgetId, amount, description }]
+        })
+    }
+
+    function addBudget({ name, max }) {
+        if (budgets.find((budget) => budget.name === name)) return
+        setBudgets((prevBudgets) => {
+            return [...prevBudgets, { id: uuidV4(), name, max }]
+        })
+    }
+
+    function deleteBudget({ id }) {
+        // TODO: deal with uncategorized expenses
+        setBudgets((prevBudgets) => {
+            return prevBudgets.filter((budget) => budget.id !== id)
+        })
+    }
+
+    function deleteExpense({ id }) {
+        setExpenses((prevExpenses) => {
+            return prevExpenses.filter((expense) => expense.id !== id)
+        })
+    }
+
     return (
-        <BudgetsContext.Provider value={budgets}>
-            <UpdateBudgetContext.Provider value={updateBudget}>
-                {children}
-            </UpdateBudgetContext.Provider>
+        <BudgetsContext.Provider
+            value={{
+                budgets,
+                expenses,
+                getBudgetExpenses,
+                addExpense,
+                addBudget,
+                deleteBudget,
+                deleteExpense,
+            }}
+        >
+            {children}
         </BudgetsContext.Provider>
     )
 }
