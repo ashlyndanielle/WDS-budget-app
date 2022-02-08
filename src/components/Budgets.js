@@ -1,14 +1,24 @@
-import { useBudgets } from '../contexts/BudgetsContext'
+import { useState } from 'react'
 import { Button, Stack } from 'react-bootstrap'
+
+import { useBudgets } from '../contexts/BudgetsContext'
 import BudgetCard from './BudgetCard'
+import AddBudgetModal from './AddBudgetModal'
 
 export default function Budgets() {
-    const budgets = useBudgets()
+    const { budgets, getBudgetExpenses } = useBudgets()
+    const [showAddBudgetModal, setShowAddBudgetModal] = useState(false)
+    const toggleAddBudgetModal = () => {
+        setShowAddBudgetModal(!showAddBudgetModal)
+    }
     return (
         <>
+            <AddBudgetModal show={showAddBudgetModal} handleClose={() => toggleAddBudgetModal()} />
             <Stack direction="horizontal" gap="2" className="mb-4">
                 <h1 className="me-auto">Budgets</h1>
-                <Button variant="primary">Add Budget</Button>
+                <Button variant="primary" onClick={() => toggleAddBudgetModal()}>
+                    Add Budget
+                </Button>
                 <Button variant="outline-primary">Add Expense</Button>
             </Stack>
             <div
@@ -19,15 +29,21 @@ export default function Budgets() {
                     alignItems: 'flex-start',
                 }}
             >
-                {budgets.map((budget, i) => {
-                    const { name, amount, max } = budget
-                    return <BudgetCard key={i} name={name} amount={amount} max={max} />
+                {budgets.map((budget) => {
+                    const { id, name, max, inactive } = budget
+                    const amount = getBudgetExpenses(id)?.reduce((total, expense) => {
+                        return (total += expense.amount)
+                    }, 0)
+                    return (
+                        <BudgetCard
+                            key={id}
+                            name={name}
+                            amount={amount}
+                            max={max}
+                            inactive={inactive}
+                        />
+                    )
                 })}
-                {/* <BudgetCard name="Groceries" amount={400} max={300} />
-                <BudgetCard name="Health & Fitness" amount={20} max={100} />
-                <BudgetCard name="Gifts" amount={30} max={200} />
-                <BudgetCard name="Gas" amount={130} max={200} />
-                <BudgetCard name="Entertainment" amount={30} max={75} inactive={true} /> */}
             </div>
         </>
     )
