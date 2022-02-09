@@ -14,10 +14,7 @@ export function useBudgets() {
     return useContext(BudgetsContext)
 }
 
-const UpdateBudgetContext = createContext()
-export function useUpdateBudget() {
-    return useContext(UpdateBudgetContext)
-}
+export const UNCATEGORIZED_BUDGET_ID = 'UNCATEGORIZED'
 
 const initialBudgets = [
     { id: uuidV4(), name: 'Groceries', max: 300 },
